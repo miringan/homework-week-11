@@ -1,6 +1,8 @@
 const express = require('express');
 const path = require('path');
 const db = require('./db/db.json');
+const { v4: uuid4 } = require('uuid');
+const fs = require('fs');
 
 const app = express();
 const PORT = 3001;
@@ -20,32 +22,56 @@ app.get('/api/notes', (req,res) => {
     res.json(db);
 })
 
+// link to post notes
+app.post('/api/notes', (req,res) => {
+    // Create (persist) data
+    const {title, text} = req.body;
 
-// app.get('/api/notes/:term', (req,res) => {
-//   const requestedTerm = req.params.term.toLowerCase();
+    if (title && text) {
+      const newNote = {
+        title,
+        text,
+        id: uuid4(),
+      };
 
-//   console.log(requestedTerm);
+      // Obtain existing notes
+      fs.readFile('./db/db.json', 'utf8', (err, data) => {
+        if (err) {
+          console.error(err);
+        } else {
+          // Convert string into JSON object
+          const parsedNotes = JSON.parse(data);
 
-//   for (let i = 0; i < db.length; i++) {
-//     if (requestedTerm === db[i].term.toLowerCase()) {
-//       return res.json(db[i]);
-//     }
-//   }
+          // Add a new note
+          parsedNotes.push(newNote);
 
-//   return res.json('No match found');
-// })
+          // Add new note to the file
+          fs.writeFile(
+            './db/db.json',
+            JSON.stringify(parsedNotes, null, 3),
+            (writeErr) =>
+              writeErr
+                ? console.error(writeErr)
+                : console.info('Successfully updated notes!')
+          );
+        }
+      });
 
-// app.post('api/notes', (req,res) => {
+      const response = {
+        status: 'success',
+        body: newNote,
+      };
 
-//     // Create (persist) data
+      console.log(response);
+      res.status(201).json(response);
+    } else {
+      res.status(500).json('Error in posting note');
+    }
 
-//     // Access the new note data from 'req
+});
 
-//     // Push it to my existing list of notes
 
-//     // Write my updates note list to the db.json file
-
-// })
+// Link for deleting note
 
 app.listen(PORT, () =>
   console.log(`Example app listening at http://localhost:${PORT}`)
