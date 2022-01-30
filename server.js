@@ -24,10 +24,11 @@ app.get('/api/notes', (req,res) => {
 
 // link to post notes
 app.post('/api/notes', (req,res) => {
-    // Create (persist) data
-    const {title, text} = req.body;
-
-    if (title && text) {
+  // capture data
+  const {title, text} = req.body;
+  
+  if (title && text) {
+      // Create (persist) data
       const newNote = {
         title,
         text,
@@ -72,6 +73,35 @@ app.post('/api/notes', (req,res) => {
 
 
 // Link for deleting note
+app.delete('/api/notes/', (req,res) => {
+
+  const deletion = req.body;
+
+  // Obtain existing notes
+  fs.readFile('./db/db.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+    } else {
+      // Convert string into JSON object
+      const parsedNotes = JSON.parse(data);
+
+      // Find the object in the parsedNotes that has the same ID
+
+      // Create a new array minus the ID of deletion
+
+      // Add recreate the db file with the new array post deletion
+      fs.writeFile(
+        './db/db.json',
+        JSON.stringify(parsedNotes, null, 3),
+        (writeErr) =>
+          writeErr
+            ? console.error(writeErr)
+            : console.info('Successfully updated notes!')
+      );
+    }
+  });
+
+});
 
 app.listen(PORT, () =>
   console.log(`Example app listening at http://localhost:${PORT}`)
