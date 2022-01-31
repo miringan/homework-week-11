@@ -73,9 +73,11 @@ app.post('/api/notes', (req,res) => {
 
 
 // Link for deleting note
-app.delete('/api/notes/', (req,res) => {
+app.delete('/api/notes/:id', (req,res) => {
 
-  const deletion = req.body;
+  const deletion = req.params;
+
+  let newParsedNotes = [];
 
   // Obtain existing notes
   fs.readFile('./db/db.json', 'utf8', (err, data) => {
@@ -86,13 +88,16 @@ app.delete('/api/notes/', (req,res) => {
       const parsedNotes = JSON.parse(data);
 
       // Find the object in the parsedNotes that has the same ID
-
-      // Create a new array minus the ID of deletion
+      for (var i = 0; i < parsedNotes.length; i++) {
+        if (deletion.id !== parsedNotes[i].id){
+          newParsedNotes.push(parsedNotes[i]);
+        }
+      }
 
       // Add recreate the db file with the new array post deletion
       fs.writeFile(
         './db/db.json',
-        JSON.stringify(parsedNotes, null, 3),
+        JSON.stringify(newParsedNotes, null, 3),
         (writeErr) =>
           writeErr
             ? console.error(writeErr)
