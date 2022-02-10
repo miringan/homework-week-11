@@ -25,10 +25,10 @@ app.get('/api/notes', async (req,res) => {
   let newArray = [];
   const readFileAsync = util.promisify(fs.readFile);
   const freshDB = await readFileAsync('./db/db.json', 'utf8');
-  let newArrayTwo = freshDB.replace("[","");
-  let newArrayThree = newArrayTwo.replace("]","");
+  // let newArrayTwo = freshDB.replace("[","");
+  // let newArrayThree = newArrayTwo.replace("]","");
   // console.log(freshDB);
-  newArray.push(JSON.parse(newArrayThree));
+  newArray = [].concat(JSON.parse(freshDB));
   console.log(newArray);
   res.json(newArray);
   // *TA SUGGESTED CODE BELOW*
