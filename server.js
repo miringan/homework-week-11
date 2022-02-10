@@ -4,10 +4,11 @@ const db = require('./db/db.json');
 const { v4: uuid4 } = require('uuid');
 const fs = require('fs');
 const util = require('util');
+const { stringify } = require('querystring');
 
 const app = express();
 const PORT = 3001;
-// add heroku compatibility
+// need to add heroku compatibility
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -20,10 +21,17 @@ app.get('/notes', (req,res) => {
 })
 
 // link to the notes db api
-app.get('/api/notes', (req,res) => {
+app.get('/api/notes', async (req,res) => {
+  let newArray = [];
   const readFileAsync = util.promisify(fs.readFile);
-  return readFileAsync('db', 'utf8');
-    // res.json(db);
+  const freshDB = await readFileAsync('./db/db.json', 'utf8');
+  let newArrayTwo = freshDB.replace("[","");
+  let newArrayThree = newArrayTwo.replace("]","");
+  // console.log(freshDB);
+  newArray.push(JSON.parse(newArrayThree));
+  console.log(newArray);
+  res.json(newArray);
+  // *TA SUGGESTED CODE BELOW*
 })
 
 // link to post notes
@@ -51,16 +59,17 @@ app.post('/api/notes', (req,res) => {
           parsedNotes.push(newNote);
 
           // Add new note to the file
-          // fs.writeFile(
-          //   './db/db.json',
-          //   JSON.stringify(parsedNotes, null, 3),
-          //   (writeErr) =>
-          //     writeErr
-          //       ? console.error(writeErr)
-          //       : console.info('Successfully updated notes!')
-          // );
-          const writeFileAsync = util.promisify(fs.writeFile);
-          return writeFileAsync('db', 'JSON.stringify(note)');
+          fs.writeFile(
+            './db/db.json',
+            JSON.stringify(parsedNotes, null, 3),
+            (writeErr) =>
+              writeErr
+                ? console.error(writeErr)
+                : console.info('Successfully updated notes!')
+          );
+          // *TA suggested code below*
+          // const writeFileAsync = util.promisify(fs.writeFile);
+          // return writeFileAsync('db', 'JSON.stringify(note)');
         }
       });
 
