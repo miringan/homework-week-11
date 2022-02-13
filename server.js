@@ -1,40 +1,37 @@
+// Import packages
 const express = require('express');
 const path = require('path');
 const db = require('./db/db.json');
 const { v4: uuid4 } = require('uuid');
 const fs = require('fs');
 const util = require('util');
-const { stringify } = require('querystring');
 
+const PORT = process.env.PORT || 3001;
 const app = express();
-const PORT = 3001;
-// need to add heroku compatibility
+// const PORT = 3001;
 
+// middleware for parsing JSON and urlencoded form data
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(express.static('public'));
 
-// send file to notes.html
+// GET route for notes page
 app.get('/notes', (req,res) => {
     res.sendFile(path.join(__dirname, '/public/notes.html'));
 })
 
-// link to the notes db api
+// GET route to access notes data from db
 app.get('/api/notes', async (req,res) => {
-  let newArray = [];
+  let dbData = [];
   const readFileAsync = util.promisify(fs.readFile);
   const freshDB = await readFileAsync('./db/db.json', 'utf8');
-  // let newArrayTwo = freshDB.replace("[","");
-  // let newArrayThree = newArrayTwo.replace("]","");
-  // console.log(freshDB);
-  newArray = [].concat(JSON.parse(freshDB));
-  console.log(newArray);
-  res.json(newArray);
-  // *TA SUGGESTED CODE BELOW*
+  dbData = [].concat(JSON.parse(freshDB));
+  console.log(dbData);
+  res.json(dbData);
 })
 
-// link to post notes
+// POST route to add notes to db
 app.post('/api/notes', (req,res) => {
   // capture data
   const {title, text} = req.body;
@@ -67,9 +64,6 @@ app.post('/api/notes', (req,res) => {
                 ? console.error(writeErr)
                 : console.info('Successfully updated notes!')
           );
-          // *TA suggested code below*
-          // const writeFileAsync = util.promisify(fs.writeFile);
-          // return writeFileAsync('db', 'JSON.stringify(note)');
         }
       });
 
@@ -87,7 +81,7 @@ app.post('/api/notes', (req,res) => {
 });
 
 
-// Link for deleting note
+// DELETE route
 app.delete('/api/notes/:id', (req,res) => {
 
   const deletion = req.params;
@@ -120,6 +114,7 @@ app.delete('/api/notes/:id', (req,res) => {
       );
     }
   });
+  res.redirect("/api/notes");
 
 });
 
